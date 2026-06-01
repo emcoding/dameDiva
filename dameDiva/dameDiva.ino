@@ -1,50 +1,83 @@
 #include <Arduino.h>
 
-// HC-SR501 PIR Bewegingssensor infrarood
-// Upside down, wiring at other side: 2 potmeters: left : distance, right: time
-// Afstand: 3-7 m
-// Time delay: how long stays triggered
-// Jumper: L/H L = timer stops looking, until TIDE delay finished, H: timer restarts with every motion
+/*
+Following Rachel De Barros youtube: pir + motor
+Instead of hooking events to the HIGH state, do it on state changes
 
-// Works now, both potmeters fully counterclockwise, flat sides to the left, seen from front, dome up.
-// PROBABLY left is time (vertraging) , right is sensitivity OR the other way around
+Version 1 25 May: detect and activate on state change only 
+Version 2 25 May: activate a blinking LED - not what I expect. First (next version)  do what Rachel does: low, blink, low 
+Version 3 26 May: take what we learned earlier, now add Rachel's state change.BUT first, we set the 
+*/
 
-// Version 20 May 2026: add led parallel, second eye
-// Version 21 May 2026 😍 : add a wink
-// Version 22 May
 
-// Led eyes
-constexpr byte rightEyePin = 13;
-constexpr byte leftEyePin = 8;
-constexpr byte eyes[] = {
+/* PINS */
+constexpr byte pirSensorPin = 12;
+constexpr byte rightEyePin = 8; 
+constexpr byte leftEyePin = 9;
+const byte eyes[] = {
   rightEyePin, leftEyePin
 };
 
-// pir: passive infrared sensor, detects movement
-constexpr byte pirSensorPin = 12;
 
-constexpr unsigned long winkPeriod   = 5000;  // ms tussen winks
-constexpr unsigned long winkDuration = 150;   // ms dat rechteroog knipoogt
+/* SENSORS */
+int motionStatus = 0; // pir detecting motion or not
+
+/* STATE CHANGE FLAGS*/
+byte pirState = LOW; // to track the state changes and act on the change, not the state of motionStatus
 
 void setup() {
-  pinMode(pirSensorPin, INPUT); // read the pir value: movement == ON
+  pinMode(pirSensorPin, INPUT);
 
   for (byte pin : eyes) {
-    pinMode(pin, OUTPUT);       // LED's on/off in sync with pir value
-    digitalWrite(pin, LOW);     // Start with leds off
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
   }
-}
-
-
-// De sluiting van de ogen was niet sync te krijgen met `if pirValue` varianten (ook met millis ipv delay). Het knipogende oog ging
-// altijd eerder uit. Deze oplossing gebruikt een tijdcyclus: millis() % 5000 , en vergelijkt dat met de
-// winkPeriod van 150 ms = "Phase based timing", stateless timing.
-bool winking() {
-  return (millis() % winkPeriod) < winkDuration;
+  
+  Serial.begin(9600);
+  delay(1000); // Give the PIR sensor time to calibrate
+  Serial.println("Dance the night away, lights on");
 }
 
 void loop() {
-  bool pirValue = digitalRead(pirSensorPin);
-  for (byte pin : eyes) digitalWrite(pin, pirValue);   // basis: beide ogen samen
-  if (pirValue && winking()) digitalWrite(rightEyePin, LOW);  // overlay: rechteroog knipt
+
+  motionStatus = digitalRead(pirSensorPin);
+  
+  delay(1000);
+
+  if (motionStatus == HIGH) {
+  // Dont be tempted to do things (activate components) here; unless you want it to repeat over and over
+
+  for (byte pin : eyes) {
+    digitalWrite(pin, HIGH);
+  }
+  
+  Serial.print("Motion detector state hi?: ");
+  Serial.println(digitalRead(pirSensorPin));
+  
+  //.. instead activate them on state change only <3 
+   if (pirState == LOW) {
+     Serial.println("Motion detected...wait for it... in 2 sec...");  
+     delay(2000);
+    
+     digitalWrite(rightEyePin, LOW);
+     delay(150);
+     digitalWrite(rightEyePin, HIGH);
+     Serial.println("Winked");
+     pirState = HIGH;
+    }
+  }
+  
+  else {
+    // Don't activate
+    if (pirState == HIGH) {
+      Serial.println("Motion ended");
+
+// Both eyes closed
+      for(byte pin : eyes) {
+        digitalWrite(pin, LOW);
+      }
+
+     pirState = LOW;
+    }
+  }
 }
