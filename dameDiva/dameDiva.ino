@@ -6,9 +6,13 @@ Instead of hooking events to the HIGH state, do it on state changes
 
 Version 1 25 May: detect and activate on state change only 
 Version 2 25 May: activate a blinking LED - not what I expect. First (next version)  do what Rachel does: low, blink, low 
-Version 3 26 May: take what we learned earlier, now add Rachel's state change.BUT first, we set the 
-*/
+Version 3 26 May: take what we learned earlier, now add Rachel's state change.BUT first, we set the EYES on with state, not state change
+Checked with Upload                         
 
+No motion: sleep;
+Motion detected: eyes open (== Leds on); after 2 secs, wink once, eyes open. Motion stopped : eyes close
+
+*/
 
 /* PINS */
 constexpr byte pirSensorPin = 12;
@@ -25,6 +29,7 @@ int motionStatus = 0; // pir detecting motion or not
 /* STATE CHANGE FLAGS*/
 byte pirState = LOW; // to track the state changes and act on the change, not the state of motionStatus
 
+
 void setup() {
   pinMode(pirSensorPin, INPUT);
 
@@ -37,6 +42,7 @@ void setup() {
   delay(1000); // Give the PIR sensor time to calibrate
   Serial.println("Dance the night away, lights on");
 }
+
 
 void loop() {
 
@@ -63,7 +69,8 @@ void loop() {
      delay(150);
      digitalWrite(rightEyePin, HIGH);
      Serial.println("Winked");
-     pirState = HIGH;
+     
+     pirState = HIGH; // Flip state, so this loop is not hit after the first time
     }
   }
   

@@ -1,4 +1,21 @@
-(versions 2x May)
+
+
+(versions May 2026)
+
+
+/*
+EXAMPLE FOR LOOP for blinking 
+for (int blinks = 1; blinks <= 10, blinks++) {
+  digitalWrite(ledPin, HIGH);
+  delay(500);
+  digitalWrite(ledPin, LOW);
+  delay(500);
+
+}
+*/
+
+
+
 
 
 /*
