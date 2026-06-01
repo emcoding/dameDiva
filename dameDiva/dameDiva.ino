@@ -64,17 +64,17 @@ int rpm = 10; // speed
 // Specific order: IN1 ,IN3, IN2, IN4
 Stepper wiggleStepper (stepsPerRevolution, A0, A2, A1, A3);  // Motor driver INx pins to analog pins on Arduino board
 
-
 /* STATE CHANGE FLAGS*/
 byte pirState = LOW; // to track the state changes and act on the change, not the state of motionStatus
 
-void setup() {
+
+void setup() 
+{
   pinMode(pirSensorPin, INPUT);
 
   // Init motor
   wiggleStepper.setSpeed(rpm);
   
-
   for (byte pin : eyes) {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
@@ -86,8 +86,8 @@ void setup() {
 }
 
 
-void loop() {
-
+void loop() 
+{
   motionStatus = digitalRead(pirSensorPin);
   
   if (motionStatus == HIGH) {
@@ -105,8 +105,7 @@ void loop() {
   wiggleStepper.step(-stepsPerRevolution);
   delay(500);
 
-
-  
+ 
   //.. instead activate them on state change only <3 
    if (pirState == LOW) {
      Serial.println("Motion detected...wait for it... in 2 sec...");  
