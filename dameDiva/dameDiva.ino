@@ -15,7 +15,7 @@ Close fast: 100ms
 Short hold: ~20-50 ms
 Open slowly: ~150-200 ms
 total 300-400 ms
-Nog beter: easing curve instead of lineair. 
+Option: easing curve instead of lineair. 
 
 Finetuning the wink: 
 * close : steps -15, delay 5 ~85 ms
@@ -25,7 +25,7 @@ Finetuning the wink:
 >>>> Current behaviour <<<<
 No motion: sleep;
 Motion detected: eyes open (== Leds on); after 2 secs, wink once: 
-close fast, hold, open slower, eyes open.
+close fast, hold, open slower, both eyes open.
 Motion stopped : eyes close
 
 */
@@ -78,13 +78,13 @@ void loop() {
   Serial.println(digitalRead(pirSensorPin));
   
   //.. instead activate them on state change only <3 
-   if (pirState == LOW) {
-     Serial.println("Motion detected...wait for it... in 2 sec...");  
-     delay(2500);
+    if (pirState == LOW) {
+      Serial.println("Motion detected...wait for it... in 2 sec...");  
+      delay(2500);
 
       wink(); // once, 
-     
-     pirState = HIGH; // Flip state, so this loop is not hit after the first time
+      
+      pirState = HIGH; // Flip state, so this loop is not hit after the first time
     }
   }
   
@@ -104,7 +104,8 @@ void loop() {
 }
 
 
-
+// PM the lineair fade is so short, it doesn't make sense to make it an easing curve. 
+// Steps and delay are finetuned by trial and error.
 void wink() {
     
   // Close eye, fast:  <100 ms (255/15 = 17 stappen * 5ms = 85 ms)
